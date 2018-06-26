@@ -1,0 +1,47 @@
+##Titanic
+
+#Load Data
+wd <- "F://"
+setwd(wd)
+train <- read.csv("train.csv", stringsAsFactors= FALSE)
+test<- read.csv("test.csv", stringsAsFactor=FALSE )
+
+
+#Combine data sets
+
+combo <- rbind(train, test)
+
+
+#Feature Engineering
+
+  #Title
+combo$Title <- gsub('.*, |\\..*','',combo$Name)
+
+table(combo$Sex, combo$Title)
+
+library(dplyr)
+
+rare_title <- c('Capt', 'Col', 'Don', 'Dona', 'Dr', 'Jonkheer', 'Lady', 'Major', 'Mlle', 'Mme', 'Rev', 'Sir', 'the Countess')
+
+combo$Title[combo$Title == 'Ms'] <- 'Miss'
+
+combo$Title[combo$Title %in% rare_title] <- 'Rare Title'
+  
+  #Surname
+combo$Surname <- gsub(', .*\\. .*','',combo$Name)
+
+  #Fam Size
+combo$FamSize <- combo$SibSp + combo$Parch +1
+combo$Family <- paste(combo$Surname, combo$FamSize, sep ='_')
+
+  #Visual
+ggplot(combo[1:891,], aes(x = FamSize, fill = factor(Survived))) +
+  geom_bar(stat='count', position='dodge') +
+  scale_x_continuous(breaks=c(1:11)) +
+  labs(x = 'Family Size')
+
+  #Fam Size Categorized
+combo$FamSizeD[combo$FamSize==1] <- 'Single'
+combo$FamSizeD[combo$FamSize >1 & combo$FamSize <5] <- 'Small'
+combo$FamSizeD[combo$FamSize >4] <- 'Large'
+
